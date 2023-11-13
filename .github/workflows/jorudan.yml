@@ -35,6 +35,7 @@ jobs:
     - name: Upload JSON to Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: tag
         files: simple_version/schedule_info_*.json
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
