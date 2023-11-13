@@ -9,7 +9,7 @@ from tqdm import tqdm
 from datetime import datetime, timedelta
 import hashlib
 import pytz
-
+import argparse
 from utils import parse_title, clean_params
 
 
@@ -193,6 +193,10 @@ def insert_schedule_data(schedule_info):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Process schedules for future days.')
+    parser.add_argument('--days', type=int, default=3, help='Number of future days to process')
+    args = parser.parse_args()
+
     # 获取当前日期和时间
     today = datetime.now()
 
@@ -200,7 +204,7 @@ if __name__ == '__main__':
     japan_timezone = pytz.timezone('Asia/Tokyo')
 
     # 计算未来三天的日期，并转换为日本时区
-    future_dates_japan = [today + timedelta(days=i) for i in range(3)]
+    future_dates_japan = [today + timedelta(days=i) for i in range(args.days)]
     future_dates_japan = [date.astimezone(japan_timezone) for date in future_dates_japan]
 
     # 创建 SQLite 表
