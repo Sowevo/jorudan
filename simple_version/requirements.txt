@@ -1,0 +1,6 @@
+pytz
+tqdm
+retrying
+requests
+requests-cache
+beautifulsoup4
