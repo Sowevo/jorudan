@@ -1,0 +1,5 @@
+scrapy
+requests
+requests-cache
+retrying
+tqdm
