@@ -31,8 +31,10 @@ jobs:
         cd simple_version
         python jorudan.py --days 1
 
+
     - name: Upload JSON to Release
-      uses: actions/upload-artifact@v3
+      uses: softprops/action-gh-release@v1
       with:
-        name: output-json
-        path: simple_version/schedule_info_*.json
+        files: simple_version/schedule_info_*.json
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
