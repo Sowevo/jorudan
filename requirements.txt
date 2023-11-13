@@ -1,3 +1,4 @@
+pytz
 scrapy
 requests
 requests-cache

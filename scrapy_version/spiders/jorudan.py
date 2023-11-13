@@ -1,3 +1,4 @@
+import pytz
 import scrapy
 import hashlib
 from datetime import datetime, timedelta
@@ -50,13 +51,13 @@ class JorudanSpider(scrapy.Spider):
         date = response.meta['date']
         schedules_links = response.css('table.timetable2 a')
         for link in schedules_links:
-            name = link.css('span::text').get()
+            # name = link.css('span::text').get()
             url = link.css('::attr(href)').get()
             url = clean_params(response.urljoin(url))
-            item = ScheduleItem()
-            item['name'] = name
-            item['url'] = url
-            yield item
+            # item = ScheduleItem()
+            # item['name'] = name
+            # item['url'] = url
+            # yield item
             yield scrapy.http.Request(url, self.parse_schedules_station, meta={'date': date})
         reverse_tags = response.css('a.tab')
         # 处理反向
@@ -69,20 +70,25 @@ class JorudanSpider(scrapy.Spider):
         """
         获取所有新干线站点列表
         """
-        # 获取当前日期
+        # 获取当前日期和时间
         today = datetime.now()
-        # 计算未来三天的日期
-        future_dates = [today + timedelta(days=i) for i in range(3)]
+        # 设置目标时区为日本时区
+        japan_timezone = pytz.timezone('Asia/Tokyo')
+        # 计算未来三天的日期，并转换为日本时区
+        future_dates_japan = [today + timedelta(days=i) for i in range(1)]
+        future_dates_japan = [date.astimezone(japan_timezone) for date in future_dates_japan]
+
+
         # 使用CSS选择器提取 <a> 标签的内容和链接
         station_links = response.css('.section_none a')
         for link in station_links:
             name = link.css('::text').get()
             url = link.css('::attr(href)').get()
             url = response.urljoin(url)
-            item = StationItem()
-            item['name'] = name
-            item['url'] = url
-            yield item
-            for date in future_dates:
+            # item = StationItem()
+            # item['name'] = name
+            # item['url'] = url
+            # yield item
+            for date in future_dates_japan:
                 yield scrapy.http.Request(url + date.strftime("?Ddd=%d&Dym=%Y%m"), self.parse_schedules,
                                           meta={'date': date})
