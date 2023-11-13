@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # 根据你的分支设置进行调整
+  workflow_dispatch:
 
 jobs:
   build:
