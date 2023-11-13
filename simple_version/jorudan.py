@@ -36,7 +36,7 @@ class Schedule:
 
 
 class ScheduleStation:
-    def __init__(self, schedule_id, name, cn_name, number, series, direction, stop_name, _date, time, stop_info_url):
+    def __init__(self, schedule_id, name, cn_name, number, series, direction, stop_name, _date, time, station_url):
         self.id = hashlib.md5((str(schedule_id) + stop_name + _date).encode()).hexdigest()
         self.schedule_id = schedule_id
         self.name = name
@@ -47,7 +47,7 @@ class ScheduleStation:
         self.stop_name = stop_name
         self.date = _date
         self.time = time
-        self.stop_info_url = stop_info_url
+        self.station_url = station_url
 
     def to_dict(self):
         return {
@@ -61,7 +61,7 @@ class ScheduleStation:
             'stop_name': self.stop_name,
             'date': self.date,
             'time': self.time,
-            'stop_info_url': self.stop_info_url
+            'station_url': self.station_url
         }
 
 
@@ -159,11 +159,11 @@ def get_schedule_stations(_schedule, _date):
     for eki in eki_elements:
         stop_name = eki.find("td", class_="eki").text.strip()
         time = eki.find("td", class_="time").text.strip().replace(" 発", "").replace(" 着", "")
-        info_url = eki.find("a", class_="noprint")["href"]
+        station_url = eki.find("a", class_="noprint")["href"]
 
         _schedule_infos.append(
             ScheduleStation(int(params['lid'][0]), name, cn_name, number, series, direction, stop_name,
-                            _date.strftime("%Y-%m-%d"), time, base_url + info_url))
+                            _date.strftime("%Y-%m-%d"), time, base_url + station_url))
     return _schedule_infos
 
 
@@ -223,7 +223,7 @@ def create_schedule_table():
             stop_name TEXT,
             date TEXT,
             time TEXT,
-            stop_info_url TEXT
+            station_url TEXT
         )
     ''')
 
@@ -238,7 +238,7 @@ def insert_schedule_data(schedule_info):
 
     for _info in schedule_info:
         cursor.execute('''
-            REPLACE INTO schedule_info (id, schedule_id, name,cn_name, number, series, direction,stop_name, date, time, stop_info_url) VALUES (:id, :schedule_id, :name,:cn_name, :number, :series, :direction,:stop_name, :date, :time, :stop_info_url)
+            REPLACE INTO schedule_info (id, schedule_id, name,cn_name, number, series, direction,stop_name, date, time, station_url) VALUES (:id, :schedule_id, :name,:cn_name, :number, :series, :direction,:stop_name, :date, :time, :station_url)
         ''', _info.to_dict())
 
     conn.commit()
