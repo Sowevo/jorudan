@@ -1,0 +1,33 @@
+name: Jorudan Workflow
+
+on:
+  push:
+    branches:
+      - main  # 根据你的分支设置进行调整
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11  # 根据你的项目需要进行调整
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r simple_version/requirements.txt
+
+    - name: Run Python Script
+      run: python simple_version/jorudan.py --days 1
+
+    - name: Upload JSON to Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: output-json
+        path: simple_version/schedule_info_*.json
