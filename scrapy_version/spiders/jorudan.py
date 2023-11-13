@@ -33,6 +33,11 @@ class JorudanSpider(scrapy.Spider):
         """
         获取一个班次下的所有站点信息
         """
+        # 解析URL
+        parsed_url = urlparse(response.url)
+        # 获取查询参数字典
+        params = parse_qs(parsed_url.query)
+        schedule_id = params['lid'][0]
         title = response.css('h1.time::text').get()
         name, cn_name, number, series, direction = self.parse_title(title)
         schedules_stations = response.css('tr.js_rosenEki')
@@ -42,6 +47,7 @@ class JorudanSpider(scrapy.Spider):
             station_url = schedule_station.css('a.noprint::attr(href)').get()
             station_url = response.urljoin(station_url)
             item = SchedulesStationItem()
+            item['schedule_id'] = schedule_id
             item['name'] = name
             item['cn_name'] = cn_name
             item['number'] = number
