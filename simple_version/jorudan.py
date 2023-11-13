@@ -1,14 +1,15 @@
+from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
 import requests
 import requests_cache
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from retrying import retry
-import re
 import sqlite3
 import json
 from tqdm import tqdm
 from datetime import datetime, timedelta
 import hashlib
+
+from utils import parse_title, clean_params
 
 
 class Station:
@@ -70,26 +71,6 @@ requests_cache.install_cache('requests_cache', expire_after=60 * 60 * 24)
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                          'Chrome/119.0.0.0 Safari/537.36'}
 base_url = 'https://www.jorudan.co.jp'
-name_map = {
-    'あさま': {'cn_name': '浅间', 'series': ''},
-    'かがやき': {'cn_name': '光辉', 'series': ''},
-    'こだま': {'cn_name': '回声', 'series': ''},
-    'こまち': {'cn_name': '小町', 'series': ''},
-    'さくら': {'cn_name': '樱', 'series': ''},
-    'たにがわ': {'cn_name': '谷川', 'series': ''},
-    'つばさ': {'cn_name': '翼', 'series': ''},
-    'つばめ': {'cn_name': '燕', 'series': ''},
-    'つるぎ': {'cn_name': '剑', 'series': ''},
-    'とき': {'cn_name': '朱鹭', 'series': ''},
-    'なすの': {'cn_name': '那须野', 'series': ''},
-    'のぞみ': {'cn_name': '希望', 'series': ''},
-    'はくたか': {'cn_name': '白鹰', 'series': ''},
-    'はやて': {'cn_name': '疾风', 'series': ''},
-    'はやぶさ': {'cn_name': '隼', 'series': ''},
-    'ひかり': {'cn_name': '光', 'series': ''},
-    'みずほ': {'cn_name': '瑞穗', 'series': ''},
-    'やまびこ': {'cn_name': '山彦', 'series': ''}
-}
 
 
 @retry(stop_max_attempt_number=10, wait_fixed=1000)
@@ -148,10 +129,15 @@ def get_schedule_stations(_schedule, _date):
     # 获取查询参数字典
     params = parse_qs(parsed_url.query)
     _schedule_infos = []
-    url = base_url + _schedule.url + _date.strftime("&Ddd=%d&Dym=%Y%m")
+    url = base_url + _schedule.url
     r = requests.get(url, headers=headers, )
     soup = BeautifulSoup(r.text, "html.parser")
-    title = soup.find('h1', class_='time').text
+    title_element = soup.find('h1', class_='time')
+    # 这里有时候返回的数据是错的,清除掉缓存试试
+    if title_element is None:
+        requests_cache.get_cache().delete_url(url)
+        print("缓存失效,重新请求:"+url)
+    title = title_element.text
     name, cn_name, number, series, direction = parse_title(title)
 
     # 查找所有class为"js_rosenEki"的元素
@@ -167,46 +153,6 @@ def get_schedule_stations(_schedule, _date):
     return _schedule_infos
 
 
-def clean_params(url):
-    # 解析URL
-    parsed_url = urlparse(url)
-    # 获取查询参数字典
-    params = parse_qs(parsed_url.query)
-    # 只保留'lid'参数
-    if 'lid' in params:
-        new_params = {'lid': params['lid']}
-    else:
-        new_params = {}
-    # 重新构建URL
-    new_query = urlencode(new_params, doseq=True)
-    new_url = urlunparse(
-        (parsed_url.scheme, parsed_url.netloc, parsed_url.path, parsed_url.params, new_query, parsed_url.fragment))
-    return new_url
-
-
-def parse_title(text):
-    """
-    从标题中解析出车次部分信息
-    """
-    # 使用正则表达式来匹配信息，允许车型信息可选，并排除括号
-    pattern = r'^(.*?)\d+号(?:\((.*?)\))? *\((.*?)行\)の運行表$'
-    match = re.match(pattern, text)
-
-    if match:
-        name = match.group(1)
-        series = match.group(2) if match.group(2) else None
-        direction = match.group(3)
-        number = re.search(r'\d+', text).group()
-    else:
-        name = None
-        series = None
-        direction = None
-        number = None
-    cn_name = name_map[name]['cn_name'] if name in name_map else name
-    return name, cn_name, number, series, direction
-
-
-# Function to create SQLite table
 def create_schedule_table():
     conn = sqlite3.connect('schedule_info.sqlite')
     cursor = conn.cursor()
@@ -256,7 +202,6 @@ if __name__ == '__main__':
     # 获取所有的站点列表
     stations = get_stations()
 
-
     # stations = [Station('東京', '/time/timetable/新横浜/新幹線のぞみ/名古屋/')]
 
     for date in future_dates:
@@ -277,4 +222,3 @@ if __name__ == '__main__':
         # 按天写入json文件
         with open('schedule_info_' + date.strftime('%Y%m%d') + '.json', 'w', encoding='utf-8') as json_file:
             json.dump([schedule.to_dict() for schedule in schedule_infos], json_file, ensure_ascii=False, indent=4)
-
