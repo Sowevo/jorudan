@@ -210,11 +210,11 @@ if __name__ == '__main__':
     # 创建 SQLite 表
     create_schedule_table()
     # 获取所有的站点列表
-    stations = get_stations()
+    stations = get_stations()[:1]
 
     # stations = [Station('東京', '/time/timetable/新横浜/新幹線のぞみ/名古屋/')]
 
-    for date in future_dates_japan[:1]:
+    for date in future_dates_japan:
         schedules_set = set()
         schedule_infos = []
         tqdm_stations = tqdm(stations, desc="加载[" + date.strftime('%Y%m%d') + "]站点信息...", ncols=150)
