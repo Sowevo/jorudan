@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     # stations = [Station('東京', '/time/timetable/新横浜/新幹線のぞみ/名古屋/')]
 
-    for date in future_dates_japan[2:3]:
+    for date in future_dates_japan[:1]:
         schedules_set = set()
         schedule_infos = []
         tqdm_stations = tqdm(stations, desc="加载[" + date.strftime('%Y%m%d') + "]站点信息...", ncols=150)
@@ -223,7 +223,7 @@ if __name__ == '__main__':
             schedules_set.update(schedules)
         all_schedules = sorted(schedules_set, key=lambda x: x.name)
         tqdm_schedules = tqdm(all_schedules, desc="加载[" + date.strftime('%Y%m%d') + "]班次信息...", ncols=150)
-        for schedule in tqdm_schedules[2:3]:
+        for schedule in tqdm_schedules:
             infos = get_schedule_stations(schedule, date)
             # 将 schedule_infos 写入 SQLite 文件
             insert_schedule_data(infos)
