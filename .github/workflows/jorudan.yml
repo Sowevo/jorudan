@@ -20,11 +20,15 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        cd simple_version
         python -m pip install --upgrade pip
-        pip install -r simple_version/requirements.txt
+        pip install -r requirements.txt
 
     - name: Run Python Script
-      run: python simple_version/jorudan.py --days 1
+      run: |
+        export PYTHONPATH=$(pwd):$PYTHONPATH
+        cd simple_version
+        python jorudan.py --days 1
 
     - name: Upload JSON to Release
       uses: actions/upload-artifact@v3
