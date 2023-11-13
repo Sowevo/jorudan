@@ -3,3 +3,5 @@ requests
 requests-cache
 retrying
 tqdm
+itemadapter
+beautifulsoup4

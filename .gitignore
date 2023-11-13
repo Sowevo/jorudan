@@ -3,3 +3,4 @@
 /simple_version/requests_cache.sqlite
 /simple_version/schedule_info.sqlite
 /simple_version/schedule_info_*.json
+/output/
