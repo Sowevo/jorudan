@@ -30,11 +30,4 @@ jobs:
         export PYTHONPATH=$(pwd):$PYTHONPATH
         cd simple_version
         python jorudan.py --days 1
-
-
-    - name: Upload JSON to Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "simple_version/schedule_info_*.json"
-        bodyFile: "body.md"
-        token: ${{ secrets.GITHUB_TOKEN }}
+        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) *.json
