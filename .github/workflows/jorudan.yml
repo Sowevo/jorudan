@@ -20,6 +20,8 @@ jobs:
         python-version: 3.11  # 根据你的项目需要进行调整
 
     - name: Install Dependencies
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cd simple_version
         python -m pip install --upgrade pip
