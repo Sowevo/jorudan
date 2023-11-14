@@ -32,7 +32,7 @@ jobs:
     - name: Release create
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run:
+      run: |
         cd simple_version
         # 获取最新的JSON文件名
         latest_file=$(ls -t *.json 2>/dev/null | head -n1)
