@@ -14,7 +14,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.11  # 根据你的项目需要进行调整
+        python-version: 3.11
 
     - name: Install Dependencies
       run: |
@@ -23,10 +23,21 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Python Script
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         export PYTHONPATH=$(pwd):$PYTHONPATH
         cd simple_version
         python jorudan.py --days 1
-        gh release create $(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1) *.json
+
+    - name: Release create
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run:
+        cd simple_version
+        # 获取最新的JSON文件名
+        latest_file=$(ls -t *.json 2>/dev/null | head -n1)
+        # 去掉文件后缀
+        file_name_no_extension="${latest_file%.json}"
+        # zip
+        zip -r $file_name_no_extension.zip $latest_file
+        # 创建release
+        gh release create file_name_no_extension-$(git log --format=%h -1) $file_name_no_extension.zip
