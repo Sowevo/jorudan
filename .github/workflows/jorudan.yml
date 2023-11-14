@@ -23,6 +23,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Python Script
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         export PYTHONPATH=$(pwd):$PYTHONPATH
         cd simple_version
