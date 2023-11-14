@@ -210,7 +210,7 @@ if __name__ == '__main__':
     # 创建 SQLite 表
     create_schedule_table()
     # 获取所有的站点列表
-    stations = get_stations()[2:3]
+    stations = get_stations()
 
     # stations = [Station('東京', '/time/timetable/新横浜/新幹線のぞみ/名古屋/')]
 
