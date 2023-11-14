@@ -41,4 +41,4 @@ jobs:
         # zip
         zip -r $file_name_no_extension.zip $latest_file
         # 创建release
-        gh release create file_name_no_extension-$(git log --format=%h -1) $file_name_no_extension.zip
+        gh release create $file_name_no_extension-$(git log --format=%h -1) $file_name_no_extension.zip
