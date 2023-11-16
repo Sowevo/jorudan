@@ -34,11 +34,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cd simple_version
+        # 日期
+        date=$(date "+%Y%m%d")
         # 获取最新的JSON文件名
-        latest_file=$(ls -t *.json 2>/dev/null | head -n1)
-        # 去掉文件后缀
-        file_name_no_extension="${latest_file%.json}"
+        latest_json=$(ls -t *.json 2>/dev/null | head -n1)
         # zip
-        zip -r $file_name_no_extension.zip $latest_file
+        zip -r ${date}_json.zip ${latest_json}
+        zip -r ${date}_db.zip schedule_info.sqlite
         # 创建release
-        gh release create $file_name_no_extension-$(git log --format=%h -1) $file_name_no_extension.zip
+        gh release create ${date}-$(git log --format=%h -1) *.zip
